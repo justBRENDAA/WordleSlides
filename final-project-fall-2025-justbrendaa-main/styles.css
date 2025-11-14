@@ -1,0 +1,248 @@
+/* INTRODUCTION SLIDE CSS */
+
+#slide-introduction h1{
+   background-color: #435663;
+   width: 100%;
+   color: white;
+   font-size: 2em;
+   text-align: center;
+}
+
+
+
+.intro-text {
+  border: 5px outset #435663;
+  text-align: center;
+}
+
+/* QUESTIONS SLIDE CSS */
+
+#slide-questions h1{
+   background-color: #435663;
+   width: 100%;
+   color: white;
+   font-size: 2em;
+   text-align: center;
+}
+
+.questions-text {
+  border: 5px outset #435663;
+  height: 50%;
+}
+
+
+/* PACKAGES SLIDE CSS */
+
+#slide-packages h1{
+   background-color: #435663;
+   width: 100%;
+   color: white;
+   font-size: 2em;
+   text-align: center;
+}
+
+.packages-text {
+  border: 5px outset #435663;
+  height: 50%;
+}
+
+/* DATASET SLIDE CSS */
+
+#slide-dataset h1{
+   background-color: #435663;
+   width: 100%;
+   color: white;
+   font-size: 2em;
+   text-align: center;
+}
+
+
+
+
+
+
+/* Style all tables */
+.dataset-table table{
+  border-collapse: collapse;
+  width: 90%;                 /* not full width */
+  margin: 0 auto 1em auto;    /* center table with space below */
+  background-color: #EFE9E3;  /* light background */
+  font-size: 0.95em;
+}
+
+/* Table cells */
+.dataset-table th, .dataset-table td {
+  border: 1px solid #435663;
+  padding: 0.4em 0.8em;
+  text-align: center;
+}
+
+/* Header row */
+.dataset-table th {
+  background-color: #435663;
+  color: white;
+}
+
+/* Zebra striping for readability */
+.dataset-table tr:nth-child(even) {
+  background-color: white;
+}
+
+
+
+/* DATA SLIDE CSS */
+
+#slide-data h1{
+   background-color: #435663;
+   width: 100%;
+   color: white;
+   font-size: 2em;
+   text-align: center;
+}
+
+
+/* ANALYSIS SLIDE CSS */
+#slide-analysis {
+  display: flex;             /* use flexbox for easy centering */
+  flex-direction: column;    
+  justify-content: center;   /* vertical centering */
+  align-items: center;       /* horizontal centering */
+  height: 100%;              /* make sure it fills the slide */
+}
+
+
+
+
+/* q1 SLIDE CSS */
+
+#slide-q1 h1{
+   background-color: #435663;
+   width: 100%;
+   color: white;
+   font-size: 2em;
+   text-align: center;
+}
+
+.q1-text {
+  border: 5px outset #435663;
+  height: 25%;
+}
+
+/* q2 SLIDE CSS */
+
+#slide-q2 h1{
+   background-color: #435663;
+   width: 100%;
+   color: white;
+   font-size: 2em;
+   text-align: center;
+}
+
+.q2-text {
+  border: 5px outset #435663;
+  height: 25%;
+}
+
+/* useful1 SLIDE CSS */
+
+#slide-useful1 h1{
+   background-color: #435663;
+   width: 100%;
+   color: white;
+   font-size: 2em;
+   text-align: center;
+}
+
+.useful1-text {
+  border: 5px outset #435663;
+  height: 50%;
+}
+
+#slide-q3 h1{
+   background-color: #435663;
+   width: 100%;
+   color: white;
+   font-size: 2em;
+   text-align: center;
+}
+
+.q3-text {
+  border: 5px outset #435663;
+  height: 25%;
+}
+
+
+#slide-q4 h1{
+   background-color: #435663;
+   width: 100%;
+   color: white;
+   font-size: 2em;
+   text-align: center;
+}
+
+.q4-text {
+  border: 5px outset #435663;
+  height: 50%;
+}
+
+
+/* useful1 SLIDE CSS */
+
+#slide-useful2 h1{
+   background-color: #435663;
+   width: 100%;
+   color: white;
+   font-size: 2em;
+   text-align: center;
+}
+
+.useful2-text {
+  border: 5px outset #435663;
+  height: 50%;
+}
+
+#slide-q5 h1{
+   background-color: #435663;
+   width: 100%;
+   color: white;
+   font-size: 2em;
+   text-align: center;
+}
+
+.q5-text-1 {
+  border: 5px outset #435663;
+  height: 20%;
+}
+
+.q5-text {
+  border: 5px outset #435663;
+  height: 40%;
+}
+
+#slide-q6 h1{
+   background-color: #435663;
+   width: 100%;
+   color: white;
+   font-size: 2em;
+   text-align: center;
+}
+
+.q6-text {
+  border: 5px outset #435663;
+  height: 30%;
+}
+
+#slide-summary h1{
+   background-color: #435663;
+   width: 100%;
+   color: white;
+   font-size: 2em;
+   text-align: center;
+}
+
+.summary-text {
+  border: 5px outset #435663;
+  height: 100%;
+}
+
+

@@ -1,0 +1,436 @@
+---
+title: "Wordle Data Analysis"
+author: "Brenda Luis"
+date: "2025-11-09"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Introduction
+
+Wordle is a popular online word puzzle where players guess a five letter word within six attempts. Each guess provides feedback: letters in the correct position are highlighted in green, letters in the word but in the wrong position appear yellow, and letters not in the word are gray. Beyond being an engaging game, Wordle presents a rich dataset for analysis. Words have unique characteristics, such as vowel-consonant balance, repeated letters, rare letters, palindromes, Scrabble scores, and frequency of usage.
+
+This analysis explores these patterns across 1600+ Wordle words to uncover trends in word selection, letter placement, and other structural features. By examining the relationships between word properties, frequency, and temporal trends, this project aims to provide insights into the hidden patterns that shape the daily puzzle.
+
+
+-
+
+# Data Preparation
+
+```{r message=FALSE, warning=FALSE}
+library(ggplot2) # plot visualization
+library(dplyr)   # data analysis (summarizing, filtering, etc)
+library(tidyr)   # reshaping data (pivot, etc)
+library(stringr) # string manipulation (used for bigrams) ok actually i realized paste would work for my bigram graphs but keeping this library in case i need to do other string stuff 
+library(kableExtra)
+library(gridExtra)
+
+```
+
+
+# About My Data
+
+
+This dataset has all the previous wordle answers. 
+Descriptive columns include boolean flags indicating if a word: 
+- has repeated letters
+- ends in y 
+- has all unique letters
+- starts with a vowel 
+- has rare letters (q, z, x)
+and more (will go into details later)
+
+```{r}
+# I scrapped this data from 
+# https://wordfinder.yourdictionary.com/wordle/answers/
+# and added what I thought to be relevant data columns 
+# some column names are easy to understand 
+# I will add some section explaining what the dataset columns mean
+
+wordle_data <- read.csv("wordle_data.csv")
+
+wordle_data %>% kbl() %>% kable_styling() %>% 
+  scroll_box(width = "100%", height = "400px")
+
+wordle_data
+```
+
+# Questions to Answer
+
+- Which letters appear more frequently in wordle solutions? 
+- Do letters appear more in certain positions
+- Which letter is the most common starting or ending letter in Wordle answers
+
+- will think of more 
+
+# Letter Counts
+
+letter counts overall
+show trends on most used letters
+
+
+note: my own scores. how many tries did it take me 
+
+
+```{r}
+letter_frequency <- wordle_data %>% 
+  select(P1, P2, P3, P4, P5) %>% 
+  pivot_longer(cols = c(P1, P2, P3, P4, P5), names_to = "Position", values_to = "Letter") %>% 
+  group_by(Letter) %>% 
+  summarise(Counts = n()) %>% 
+  arrange(-Counts)
+  
+
+head(letter_frequency, n = 4)
+tail(letter_frequency, n = 4)
+
+letter_frequency
+
+letter_frequency %>% 
+  ggplot(aes(x = reorder(Letter,-Counts), y = Counts)) + geom_col()
+```
+
+
+## Letter Counts by position
+
+letter counts by positions
+show trends on most used letters by position 
+
+The heatmap shows how frequently each letter appears in each position of Wordle answers. Darker shades indicate more common letters. By visualizing letter frequency across positions we can identify common structural patterns in five letter words like certain consonants often starting words.
+
+S appears very often in P1 (starting position)
+Y is very common in P5
+
+
+
+```{r}
+# x = letter
+# y = position 
+# heatmap 
+
+
+positional_letter_frequency <- wordle_data %>% 
+  select(P1, P2, P3, P4, P5) %>% 
+  pivot_longer(cols = c(P1, P2, P3, P4, P5), names_to = "Position", values_to = "Letter") %>% 
+  group_by(Position, Letter) %>% 
+  summarise(Counts = n()) %>% 
+  arrange(Position, -Counts)
+
+positional_letter_frequency
+
+positional_letter_frequency %>% 
+  ggplot(aes(x = reorder(Letter, -Counts), y = Counts)) + 
+  geom_col() + 
+  facet_wrap(~Position, scales = "free_x")
+
+positional_letter_frequency %>% 
+  ggplot(aes(x = reorder(Letter, -Counts), y = Counts)) + 
+  geom_col() + 
+  facet_wrap(~Position)
+
+positional_letter_frequency %>%
+  ggplot(aes(x = Letter, y = Position, fill = Counts)) +
+  geom_tile(color = "White") + 
+  geom_text(aes(label = Counts), color = "White", size = 2) #+
+  #scale_fill_gradient(low = "salmon", high = "darkred")
+
+# filter and plot
+# vowels first 
+# or maybes just vowels
+
+```
+
+
+
+
+
+## Data Analysis
+
+```{r}
+# so I found this data on kaggle
+# https://www.kaggle.com/code/bcruise/wordle-letter-frequencies
+# and towards the end they do common bigram analysis 
+# will do that with my data 
+# so I can use P1, P2, P3, P4, P5
+# this holds the individual letters by position
+
+bigrams <- wordle_data %>% 
+  mutate (B1 = paste0(P1, P2),  # paste0 no separator by default
+          B2 = paste0(P2, P3),
+          B3 = paste0(P3, P4),
+          B4 = paste0(P4, P5)) %>% 
+  select(B1, B2, B3, B4) %>% 
+  pivot_longer(cols = everything(), names_to = "Position", values_to = "Bigram") %>% # names_to = col name to create from specified cols before, values_to = new column to create from values in each cell.
+  group_by(Bigram) %>% 
+  summarise(Counts = n()) %>% 
+  arrange(-Counts)
+ 
+
+
+bigrams
+
+```
+
+## MOST COMMON BIGRAMS 
+position not taken  into account here
+
+what does this graph tell us? 
+the Most Common Bigrams plot shows which two letter combos appear most frequently across all Wordle answers regardless of where they occur in the word. This gives insight into the most common letter pairings in English five letter words which can be useful for players choosing strong starting guesses.
+
+```{r}
+
+# plotting bigram data
+# code below bad 
+# didnt realize i had 354 possible bigrams
+
+# bigrams %>% ggplot(aes(x = Bigram)) + geom_bar()
+
+# instead lets take top bigrams 
+top_bigrams <- bigrams %>% head(25)
+top_bigrams
+
+# top_bigrams %>% ggplot(aes(x = Bigram)) + geom_bar()
+
+# https://r-resources.massey.ac.nz/rgcookbook/RECIPE-BAR-GRAPH-COUNTS.html
+# section 3.3.4
+
+# geom_col uses stat_identity by default so I can pass in the pre-calculated counts
+top_bigrams %>% ggplot(aes(x = reorder(Bigram, -Counts), y = Counts)) + geom_col()
+
+# will add labels and stuff later. 
+```
+
+## Most common bigrams by position?
+
+The Most Common Bigrams by Position plot breaks bigrams data down by where the pair appears within the word. This helps reveal structural patterns like certain bigrams like “TH” or “SH” can appear more often at the start of words while others like “ER” or “LY” can appear near the end more frequently. Understanding these trends can guide more strategic guesses by considering both frequency and position. I will go deeper into this when looking at the prefix and suffix columns in the data
+
+```{r}
+
+bigrams_by_position <- wordle_data %>% 
+  mutate (B1 = paste0(P1, P2),  # paste0 no separator by default
+          B2 = paste0(P2, P3),
+          B3 = paste0(P3, P4),
+          B4 = paste0(P4, P5)) %>% 
+  select(B1, B2, B3, B4) %>% 
+  pivot_longer(cols = everything(), names_to = "Position", values_to = "Bigram") %>%  # names_to = col name to create from specified cols before, values_to = new column to create from values in each cell.
+  group_by(Position, Bigram) %>% 
+  summarise(Counts = n()) %>% 
+  arrange(Position, -Counts)
+ 
+bigrams_by_position
+```
+
+```{r}
+# just taking 10 from each position
+# b4 has a tie
+
+top_bigrams_by_pos <- bigrams_by_position %>%
+  group_by(Position) %>%
+  slice_max(Counts, n = 10)
+
+top_bigrams_by_pos
+
+# positional bigrams do not share same x axis :(
+top_bigrams_by_pos %>% ggplot(aes(x = Bigram, y = Counts)) + geom_col() + facet_wrap(~Position)
+
+# fixed here
+# ok why is this not reordering?? 
+top_bigrams_by_pos %>% ggplot(aes(x = reorder(Bigram, -Counts), y = Counts)) + geom_col() + facet_wrap(~Position, scales = "free_x")
+
+bigrams
+```
+
+# month of november stats 2024
+
+```{r}
+october_data_2024 <- wordle_data %>% 
+  filter(Month == "October", Year == "2024") %>% 
+  arrange(Wordle.Number)
+
+october_data_2024
+
+october_data_2025 <- wordle_data %>% 
+  filter(Month == "October", Year == "2025") %>% 
+  arrange(Wordle.Number)
+
+october_data_2025
+
+october_data_2024 %>% 
+  filter(Has.repeated.letters == TRUE) %>% 
+  summarise(counts = n())
+
+october_data_2025 %>% 
+  filter(Has.repeated.letters == TRUE) %>% 
+  summarise(counts = n())
+
+
+
+october_data_2024 %>% 
+  filter(Ends.with.Y == TRUE) %>% 
+  summarise(counts = n())
+
+october_data_2025 %>% 
+  filter(Ends.with.Y == TRUE) %>% 
+  summarise(counts = n())
+
+
+
+
+november_data_2025 <- wordle_data %>% 
+  filter(Month == "November", Year == "2025") %>% 
+  arrange(Wordle.Number)
+
+
+
+november_data_2025
+
+```
+
+
+
+# Summary
+
+```{r}
+
+library(lubridate)
+# this makes my string date column into date objects
+wordle_data <- wordle_data %>% 
+  mutate(Date = as.Date(Date, format = "%Y-%m-%d"))
+
+wordle_data
+
+wordle_data <- wordle_data %>% 
+  mutate(
+    day = mday(Date),
+    month = month(
+      Date, label = T, abbr = F, locale = 'en_US.UTF-8'),
+    Weekday = wday(Date, label = T, locale = 'en_US.UTF-8'),
+    Week = stringi::stri_datetime_fields(Date)$WeekOfMonth
+    )
+
+wordle_data %>% 
+  filter(Month == "November", Year == 2024) %>% 
+  select(Week, Date, everything()) %>% 
+  arrange(Date)
+
+labels_color <- 'grey30'
+
+
+november_data <- wordle_data %>% 
+  filter(Month == "November", Year == 2024) %>% 
+  mutate(n = Has.repeated.letters)
+
+# calendar heatmap
+ggplot(november_data, aes(x = Weekday, y = 5 - Week)) +
+  geom_tile(aes(fill = n), color = "black") +
+  scale_fill_gradient(low = "white", high = "steelblue") +
+  facet_wrap(vars(Month), ncol = 1) +
+  coord_equal(expand = FALSE) +
+  labs(title = "Words with Repeated Letters (November 2024)",
+       fill = "Has Repeated Letters") +
+  theme_minimal()
+
+# calendar heatmap
+ggplot(november_data, aes(x = Weekday, y = 5 - Week)) +
+  geom_tile(aes(fill = n), color = "black") +
+  geom_text(
+    aes(label = day), 
+    hjust = 0, vjust = 1.2,  # top-left corner
+    size = 3, color = "black"
+  ) +
+  scale_fill_gradient(low = "white", high = "steelblue") +
+  facet_wrap(vars(month), ncol = 1) +
+  coord_equal(expand = FALSE) +
+  labs(title = "Words with Repeated Letters (November 2024)",
+       fill = "Has Repeated Letters") +
+  theme_minimal()
+
+
+```
+
+```{r}
+
+library(calendR)
+
+november_data <- wordle_data %>%
+  mutate(Date = as.Date(Date, format = "%b %d %Y")) %>%
+  filter(Month == "November", Year == 2024)
+
+# Create vector of colors (1 = has repeated letters)
+colors <- ifelse(november_data$`Has.repeated.letters` == 1, "steelblue", "grey80")
+
+calendR(
+  year = 2024,
+  month = 11,
+  start = "S",
+  special.days = november_data$Day,
+  special.col = colors,
+  title = "Words with Repeated Letters (Nov 2024)"
+)
+
+
+```
+
+```{r}
+library(calendR)
+library(dplyr)
+
+# make sure Date is actually a date
+wordle_data <- wordle_data %>%
+  mutate(Date = as.Date(Date, format = "%b %d %Y"))
+
+# filter November 2024
+november_data <- wordle_data %>%
+  filter(Month == "November", Year == 2024)
+
+repeated_days <- wordle_data %>%
+  filter(Month == "November", Year == 2024, `Has.repeated.letters` == 1) %>%
+  pull(Day)
+
+repeated_days
+
+
+# build the calendar
+calendR(
+  year = 2024,
+  month = 11,
+  start = "S",
+  title = "Words with Repeated Letters (November 2024)",
+  special.days = repeated_days,
+  special.col = "lightblue"
+)
+
+november_data %>% 
+  arrange(Date)
+
+
+
+```
+
+how to do tabs 
+
+## Bigram Position Visualizations {.tabset}
+
+### B1
+```{r}
+B1_plot
+```
+
+### B2
+```{r}
+B2_plot
+```
+
+### B3
+```{r}
+B3_plot
+```
+
+### B4
+```{r}
+B4_plot
+``
+
